@@ -119,71 +119,50 @@ python3 nexus_foundation.py
 
 ---
 
-# Módulo 2: IaC Copilot - Automação e Governança de Infraestrutura
+# Módulo 2: IaC Copilot — Automação, Compliance e Self-Healing
 
-Após compreendermos os fundamentos das LLMs e a orquestração de agentes no Módulo 1, entramos na fase de **implementação física**. No Módulo 2, transformamos a "conversa" em ativos de engenharia reais.
+Neste módulo, evoluímos a Inteligência Artificial de uma interface de chat para um **Motor de Execução de Infraestrutura**. O foco é a materialização de ativos de nuvem (Terraform) e a implementação de camadas de segurança programática.
 
-## 🎯 Objetivos de Aprendizado
-
-- Implementar **Custom Tools** para interação com o Sistema de Arquivos (OS)
-- Automatizar a geração de **Terraform HCL** com foco em modularidade
-- Integrar scanners de segurança (**Checkov**) no fluxo agêntico
-- Criar um loop de **Self-Healing IaC**: Detecção de falhas de segurança e correção automática pela IA
-
----
-
-## 🛠️ O Ecossistema de Automação
-
-Diferente do módulo anterior, aqui o Agente Arquiteto recebe capacidades de escrita. O fluxo segue o padrão **PR-First assistido**:
-
-1. **Input:** "Preciso de um ambiente de storage para produção"
-2. **Brainstorming:** O agente decide a melhor arquitetura
-3. **Action:** O agente chama a `escritor_de_arquivo` e gera o `main.tf`
-4. **Validation:** O Agente Auditor executa o `Checkov` e lê o output
-5. **Feedback Loop:** Se houver falhas de segurança (ex: bucket sem criptografia), o Auditor devolve o erro para o Arquiteto, que reescreve o código até que ele passe no scan
+## 🎯 Objetivos Técnicos
+- **Infrastructure-as-Code Synthesis:** Tradução de requisitos de alto nível para HCL (HashiCorp Configuration Language).
+- **Static Code Analysis (SCA):** Integração profunda com **Checkov** para detecção de misconfigurations.
+- **Policy-as-Code (PaC):** Validação de regras de negócio via **OPA (Open Policy Agent)**.
+- **Drift Management:** Identificação de divergências entre o estado real da nuvem e o código versionado.
 
 ---
 
-## 🧰 Ferramentas Adicionais
+## 🏗️ Arquitetura do Pipeline Agêntico
 
-Além das bibliotecas de IA, este módulo exige:
+O ecossistema deste módulo é composto por um fluxo de **Feedback Loop Fechado**, onde a IA atua como desenvolvedora e auditora simultaneamente.
 
-- **Checkov:** Scanner de Infraestrutura como Código
-- **Terraform CLI:** Para validação de sintaxe
+### 1. Camada de Geração (`nexus_iac_copilot.py`)
+Utiliza o Agente **Arquiteto Terraform** para:
+- Interpretar prompts em linguagem natural.
+- Mapear requisitos para provedores específicos (AWS/GCP/Azure).
+- Executar a `writer_tool` para persistir o código em arquivos `.tf`.
+
+### 2. Camada de Governança (`nexus_iac_advanced.py`)
+Implementa o Agente **Auditor de DevSecOps**, que possui duas "visões" críticas:
+- **Visão Técnica (Checkov):** Escaneia o arquivo gerado em busca de vulnerabilidades (ex: S3 público, criptografia desativada, falta de logs).
+- **Visão de Negócio (OPA):** Valida se o recurso segue as políticas da Nexus (ex: Regiões permitidas, tags obrigatórias).
+
+### 3. Camada de Remediação (Self-Healing)
+Se qualquer auditor reprovar o código, o erro é injetado novamente no contexto do Arquiteto. A IA realiza a **refatoração autônoma** até que o código atinja o estado de compliance total.
+
+---
+
+## 🛠️ Configuração e Pré-requisitos
+
+### Instalação de Dependências
+Além do CrewAI e Groq, este módulo exige ferramentas de análise estática:
 
 ```bash
+# Instalação do Scanner de IaC
 pip install checkov
+
+# Instalação das dependências de orquestração
+pip install litellm langchain-groq python-dotenv
 ```
 
----
+Sugerimos que você pode instalar o checkov como binário também na sua máquina!
 
-## 🚀 Execução do Laboratório
-
-Para validar o fluxo de Automação e Governança, execute o script principal:
-
-```bash
-python3 nexus_iac_copilot.py
-```
-
-### O que acontece durante a execução:
-
-- **Geração:** O Agente Arquiteto criará um plano HCL
-- **Persistência:** O arquivo `main.tf` será criado fisicamente na sua pasta
-- **Auditoria:** O Agente Auditor invocará o Checkov via subprocesso Python
-- **Ciclo de Correção:** Caso o Checkov encontre falhas (ex: `CKV_AWS_144` - falta de criptografia em repouso), o Auditor enviará o log de erro de volta para o Arquiteto. O Arquiteto irá refatorar o código e salvar novamente até que o scan retorne `PASSED`
-
----
-
-## ⚠️ Pontos de Atenção
-
-- **Permissões de Escrita:** Certifique-se de que o script tem permissão para criar arquivos na pasta atual
-- **Versão do Terraform:** O código gerado é compatível com Terraform 1.0+
-- **Instalação do Checkov:** Caso o comando `checkov` não seja encontrado, certifique-se de que o diretório de scripts do Python está no seu PATH (comum em macOS com Python 3.13)
-
----
-
-## 📚 Conclusão do Módulo
-
-Ao final deste laboratório, você terá implementado um pipeline de Compliance-as-Code movido a IA, onde a inteligência não apenas sugere, mas executa e garante a segurança da infraestrutura antes mesmo do `terraform apply`.
-
----

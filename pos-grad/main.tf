@@ -1,21 +1,20 @@
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
-
 provider "aws" {
   region = "us-west-2"
-  profile = "cami"
 }
 
-resource "aws_s3_bucket" "nexus_production_data" {
-  bucket = "nexus-production-data"
+resource "aws_s3_bucket" "apollo" {
+  bucket = "apollo-project-bucket"
+  acl    = "private"
+
   versioning {
     enabled = true
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
   }
 }
