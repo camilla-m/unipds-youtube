@@ -1,37 +1,85 @@
-# Módulo 1: Fundamentos e Arquitetura de IA para Infra
+# Módulo 1: Fundamentos e Arquitetura de IA para Infraestrutura
 
-Este módulo estabelece a base conceitual e técnica para a utilização de Modelos de Linguagem de Grande Escala (LLMs) em fluxos de trabalho DevOps e Engenharia de Plataforma.
+Este módulo estabelece a base técnica para a utilização de Modelos de Linguagem de Grande Escala (LLMs) aplicados à Engenharia de Plataforma e DevOps, focando na transição de chatbots passivos para **Agentes Autônomos**.
 
-## 🎓 Conteúdo Programático
-
-### 1.1 LLMs e APIs no Contexto DevOps
-Nesta aula, exploramos a transição do processamento de linguagem natural (NLP) para a geração de código de infraestrutura.
-- **Arquitetura de Transformers:** Como o mecanismo de *Self-Attention* permite que a IA entenda dependências em arquivos YAML e HCL.
-- **Ecossistema de APIs:** - **GPT-4o:** O estado da arte para raciocínio e *Function Calling*.
-  - **Claude 3.5 Sonnet:** Líder atual em geração de código limpo e seguimento de instruções complexas.
-  - **AWS Bedrock:** A escolha para ambientes empresariais que exigem isolamento de dados e compliance.
-
-### 1.2 Frameworks de Agentes (LangChain & CrewAI)
-Diferenciamos o "Chat" (interação manual) do "Agente" (automação autônoma).
-- **Abstração de Ferramentas (Tools):** Como encapsular scripts CLI e APIs de Cloud para que a LLM possa "executar" ações.
-- **Orquestração Multi-Agente:** O uso do CrewAI para definir papéis (Roles), metas (Goals) e backstories, permitindo que IAs colaborem como um time de SRE.
-
-### 1.3 RAG e Prompting Estruturado
-Como garantir precisão técnica e evitar alucinações.
-- **RAG (Retrieval-Augmented Generation):** Técnica de injetar contextos externos (documentação técnica, segredos de infra, runbooks) no prompt da LLM.
-- **Chain-of-Thought (CoT):** Técnica de prompting que força o modelo a descrever seu raciocínio passo a passo antes de sugerir um comando `kubectl` ou `terraform`.
-- **Few-Shot:** Ensinar padrões de nomenclatura da empresa através de exemplos práticos no prompt.
+## 🎯 Objetivos de Aprendizado
+- Compreender a arquitetura de **Transformers** e sua aplicação em linguagens de infraestrutura (HCL/YAML).
+- Configurar ambientes de execução de IA utilizando **Python 3.13** e **Groq**.
+- Implementar fluxos agênticos multi-agentes com **CrewAI**.
+- Aplicar conceitos de **RAG (Retrieval-Augmented Generation)** para governança de dados.
 
 ---
 
-## 🛠️ Laboratório Prático: Nexus Foundation
+## 🏗️ Arquitetura do Sistema (Nexus Foundation)
 
-O script `nexus_foundation.py` demonstra a integração de todos os conceitos acima:
-1. **Conexão via API** com GPT-4.
-2. **Uso de Tools** para simular uma consulta de RAG em políticas corporativas.
-3. **Fluxo Sequencial** entre um Arquiteto e um Engenheiro de Segurança.
+O laboratório deste módulo implementa um sistema de decisão em dois níveis:
+1. **Agente Arquiteto:** Responsável por interpretar a necessidade de negócio e consultar as normas técnicas via **Custom Tools**.
+2. **Agente DevSecOps:** Atua como um *Quality Gate*, revisando as proposições do arquiteto antes da finalização.
 
-### Como Executar
-1. Instale as dependências:
-   ```bash
-   pip install crewai langchain-openai python-dotenv
+### Stack Tecnológica
+- **Linguagem:** Python 3.13+
+- **Orquestrador:** CrewAI
+- **LLM:** Llama 3.3-70b (via Groq Cloud)
+- **Interface de API:** LiteLLM (Ponte de conectividade)
+
+---
+
+## 🛠️ Configuração do Ambiente
+
+### 1. Requisitos de Sistema
+Certifique-se de ter o Python instalado e crie um ambiente virtual para evitar conflitos de dependências:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 2. Instalação de Dependências
+Instale as versões validadas para este módulo:
+
+```bash
+pip install python-dotenv crewai==0.28.8 langchain-groq litellm
+```
+
+### 3. Variáveis de Ambiente (.env)
+Crie um arquivo .env na raiz do projeto com suas chaves de API.
+Nota: Devido a restrições de inicialização do CrewAI, uma chave placeholder da OpenAI é necessária mesmo utilizando Groq.
+
+```bash
+GROQ_API_KEY=gsk_your_key_here
+OPENAI_API_KEY=sk-placeholder
+```
+
+### 🚀 Execução do Laboratório
+O script principal (nexus_foundation.py) demonstra o conceito de RAG Funcional. O agente não possui conhecimento prévio das normas da empresa "Nexus", ele é forçado a utilizar uma ferramenta (tool) para buscar essas informações antes de responder.
+
+Para rodar o laboratório:
+
+```bash
+python3 nexus_foundation.py
+```
+
+### O que observar no output:
+
+- Thought Process: Acompanhe o raciocínio da IA decidindo usar a ferramenta de normas.
+- Tool Output: Veja a extração dos prefixos nexus- e sufixos -prod em tempo real.
+- Final Verdict: A revisão de segurança validando se o plano está em conformidade.
+
+### 📚 Conceitos-Chave para Revisão
+
+- Agentic Workflow: A IA deixa de ser um oráculo e passa a ser um colaborador que executa funções.
+- Chain-of-Thought: Técnica de prompting que estruturamos nas Tasks para garantir que a IA explique o plano antes de sugerir comandos críticos.
+- Tokenização: Como a infraestrutura é "quebrada" em pedaços lógicos para processamento da LLM.
+
+---
+
+### 💡 Dica para a Professora:
+Se você for disponibilizar esse código no GitHub ou em um portal do aluno, adicione um arquivo `.gitignore` simples para garantir que ninguém suba as chaves de API:
+
+```text
+.env
+venv/
+__pycache__/
+*.tfstate
+*.tfvars
+```
