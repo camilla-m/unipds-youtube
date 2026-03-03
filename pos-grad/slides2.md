@@ -3,7 +3,7 @@ marp: true
 theme: uncover
 class: invert
 paginate: true
-backgroundColor: #0d1117
+backgroundColor: #0a0e14
 color: #e6edf3
 style: |
   section { text-align: left; font-size: 20px; }
@@ -14,112 +14,57 @@ style: |
 
 ---
 
-# Módulo 2: IaC Copilot & Advanced Governance
-## Do Código à Governança com Checkov e OPA
+# Módulo 2: IaC Copilot & Security Governance
+## Geração, Auditoria e Self-Healing com IA
 **Professora:** Camilla Martins
-**Tecnologias:** Terraform, Checkov, OPA, CrewAI.
+**Aulas:** 2.1 a 2.3
 
 ---
 
-# 2.1 Aula: O Copilot de Infraestrutura
-### De Requisitos a Arquivos Físicos
+# Aula 2.1: De Requisitos a HCL
+### O Agente como Tradutor de Negócio
 
-- **Evolução do Agente:** A IA deixa de apenas sugerir código e passa a gerenciar o sistema de arquivos via `writer_tool`.
-- **Tradução HCL:** Como mapear "Ambiente de Produção" para argumentos de segurança robustos no Terraform.
-- **Workflow:** Entrada em Linguagem Natural -> Processamento Agêntico -> Arquivo `main.tf` persistido.
+- **Tradução Semântica:** Como a IA converte "Ambiente de Produção de Logs" em blocos `resource "aws_s3_bucket"`.
+- **Persistência via `writer_tool`:** - A diferença entre gerar texto e manipular o FileSystem.
+  - O uso do Python como ponte para criar o arquivo `main.tf` fisicamente.
 
----
 
-# 2.2 Aula: Security Scan com Checkov
-### Static Code Analysis (SCA) movido a IA
-
-- **O que é o Checkov?** Ferramenta líder para escanear falhas de segurança em IaC.
-- **Integração Agêntica:** O Agente Auditor executa o Checkov e "lê" o relatório de erros.
-- **Loop de Self-Healing:** Se o Checkov reprova o código (ex: falta de criptografia no S3), a IA refatora o arquivo automaticamente até que o scan passe com sucesso.
-
----
-marp: true
-theme: uncover
-class: invert
-paginate: true
-backgroundColor: #0d1117
-color: #e6edf3
-style: |
-  section { text-align: left; font-size: 20px; }
-  h1 { color: #00ff88; font-size: 38px; border-bottom: 2px solid #00ff88; }
-  h2 { color: #00d4ff; font-size: 28px; }
-  code { background-color: #1a1f29; color: #ffca28; }
-  b { color: #00ff88; }
 
 ---
 
-# Módulo 2: IaC Copilot & Advanced Governance
-## Do Código à Governança com Checkov e OPA
-**Professora:** Camilla Martins
-**Tecnologias:** Terraform, Checkov, OPA, CrewAI.
+# Aula 2.2: Compliance-as-Code com Checkov
+### Segurança Técnica via Análise Estática (SCA)
+
+- **Scanner Real:** Integração via `subprocess` com o binário do **Checkov**.
+- **O que validamos?**
+  - Criptografia em repouso (SSE).
+  - Bloqueio de acesso público (Public Access Block).
+  - Versionamento de recursos críticos.
+- **Feedback Loop:** Se o Checkov reprova, a IA lê o log de erro e refatora o código automaticamente até passar.
 
 ---
 
-# 2.1 Aula: O Copilot de Infraestrutura
-### De Requisitos a Arquivos Físicos
+# Aula 2.3: OPA e Lógica de Negócio
+### Governança Além da Segurança Técnica
 
-- **Evolução do Agente:** A IA deixa de apenas sugerir código e passa a gerenciar o sistema de arquivos via `writer_tool`.
-- **Tradução HCL:** Como mapear "Ambiente de Produção" para argumentos de segurança robustos no Terraform.
-- **Workflow:** Entrada em Linguagem Natural -> Processamento Agêntico -> Arquivo `main.tf` persistido.
+- **OPA (Open Policy Agent):** Validação de regras que scanners genéricos não conhecem.
+- **Exemplos de Regras Nexus (Rego):**
+  - Soberania de Dados: "Recursos apenas em us-east-1".
+  - Controle de Custo: "Proibido instâncias maiores que t3.medium".
+- **Drift Detection:** O papel da IA em identificar quando o console da Cloud diverge do código.
 
----
 
-# 2.2 Aula: Security Scan com Checkov
-### Static Code Analysis (SCA) movido a IA
-
-- **O que é o Checkov?** Ferramenta líder para escanear falhas de segurança em IaC.
-- **Integração Agêntica:** O Agente Auditor executa o Checkov e "lê" o relatório de erros.
-- **Loop de Self-Healing:** Se o Checkov reprova o código (ex: falta de criptografia no S3), a IA refatora o arquivo automaticamente até que o scan passe com sucesso.
 
 ---
 
-# 2.3 Aula: Advanced Governance com OPA
-### Policy-as-Code e Detecção de Drift
+# Prática: O Pipeline de Automação
+### Anatomia do Script Advanced
 
-- **OPA (Open Policy Agent):** Validação de regras de negócio que scanners comuns não pegam (ex: "Buckets só podem existir na região us-east-1").
-- **Detecção de Drift:** Monitoramento do estado real da nuvem versus o código.
-- **Remediação Assistida:** A IA identifica mudanças manuais indevidas e gera o plano de ação para restaurar a conformidade.
-
----
-
-# Prática: O Pipeline Nexus de IaC
-### O que construímos no Advanced.py?
-
-1. **Arquiteto:** Gera o HCL inicial.
-2. **Auditor Checkov:** Garante que não há vulnerabilidades técnicas (SCA).
-3. **Auditor OPA:** Garante que o código segue as regras da empresa.
-4. **SRE Agent:** Detecta Drift e propõe correções de estado.
+1. **Arquiteto:** Gera o arquivo HCL inicial.
+2. **Auditor (Checkov):** Roda o scan real. Se falhar, devolve para o Arquiteto.
+3. **Auditor (OPA):** Valida se o projeto respeita o orçamento e a região da empresa.
+4. **Finalização:** O arquivo `main.tf` é entregue pronto para o `terraform apply`.
 
 ```bash
-# Executando o ciclo de Chechov
-python3 nexus_iac_copilot.py
-````
-
----
-
-# 2.3 Aula: Advanced Governance com OPA
-### Policy-as-Code e Detecção de Drift
-
-- **OPA (Open Policy Agent):** Validação de regras de negócio que scanners comuns não pegam (ex: "Buckets só podem existir na região us-east-1").
-- **Detecção de Drift:** Monitoramento do estado real da nuvem versus o código.
-- **Remediação Assistida:** A IA identifica mudanças manuais indevidas e gera o plano de ação para restaurar a conformidade.
-
----
-
-# Prática: O Pipeline Nexus de IaC
-### O que construímos no Advanced.py?
-
-1. **Arquiteto:** Gera o HCL inicial.
-2. **Auditor Checkov:** Garante que não há vulnerabilidades técnicas (SCA).
-3. **Auditor OPA:** Garante que o código segue as regras da empresa.
-4. **SRE Agent:** Detecta Drift e propõe correções de estado.
-
-```bash
-# Executando o ciclo completo de IA-Ops
-python3 nexus_iac_advanced.py
-```
+# Executando o Módulo 2
+python3 modulo2_iac_copilot.py

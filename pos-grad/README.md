@@ -1,168 +1,121 @@
-# Módulo 1: Fundamentos e Arquitetura de IA para Infraestrutura
+# 🚀 Nexus AI-Ops Framework
 
-Este módulo estabelece a base técnica para a utilização de Modelos de Linguagem de Grande Escala (LLMs) aplicados à Engenharia de Plataforma e DevOps, focando na transição de chatbots passivos para **Agentes Autônomos**.
+**Engenharia de Plataforma e SRE assistida por IA agêntica**
 
-## 🎯 Objetivos de Aprendizado
-
-- Compreender a arquitetura de **Transformers** e sua aplicação em linguagens de infraestrutura (HCL/YAML)
-- Configurar ambientes de execução de IA utilizando **Python 3.13** e **Groq**
-- Implementar fluxos agênticos multi-agentes com **CrewAI**
-- Aplicar conceitos de **RAG (Retrieval-Augmented Generation)** para governança de dados
+O **Nexus AI-Ops** é um ecossistema modular desenvolvido para demonstrar a aplicação de agentes de IA no ciclo de vida de operações de TI (DevOps & SRE). O projeto evolui de uma fundação de consulta (RAG) para a automação de infraestrutura (IaC), orquestração de containers (Kubernetes) e resolução de incidentes (Troubleshooting).
 
 ---
 
-## 🏗️ Arquitetura do Sistema (Nexus Foundation)
+## 🏗️ Arquitetura do Projeto
 
-O laboratório deste módulo implementa um sistema de decisão em dois níveis:
+O repositório separa a **Inteligência (Agentes)** das **Capacidades de Execução (Tools)**.
 
-1. **Agente Arquiteto:** Responsável por interpretar a necessidade de negócio e consultar as normas técnicas via **Custom Tools**
-2. **Agente DevSecOps:** Atua como um *Quality Gate*, revisando as proposições do arquiteto antes da finalização
+### `core/` — o cérebro
 
-### Stack Tecnológica
+- **`llm_config.py`**: configuração de conexão com Llama 3.3 via Groq/LiteLLM.
+- **`agents.py`**: personas (Arquiteto Cloud, Auditor, SRE e On-Call).
 
-- **Linguagem:** Python 3.13+
-- **Orquestrador:** CrewAI
-- **LLM:** Llama 3.3-70b (via Groq Cloud)
-- **Interface de API:** LiteLLM (Ponte de conectividade)
+### `tools/` — as mãos
+
+- **`policy_rag.py`** (Mod 1): consulta de normas e documentação.
+- **`file_writer.py`** (Mod 2): persistência de arquivos de infraestrutura.
+- **`security_scan.py`** (Mod 2): integração com Checkov e OPA.
+- **`k8s_ops.py`** (Mod 3): manifestos K8s, reconciliação GitOps e canary.
+- **`k8s_diag.py`** (Mod 4): diagnóstico de Pods (logs, eventos, describe).
+- **`obs_tools.py`** (Mod 4): consultas simuladas em Prometheus e Jaeger.
+
+### `labs/`
+
+Scripts de entrada de cada módulo (`modulo1_*.py` a `modulo4_*.py`).
 
 ---
 
-## 🛠️ Configuração do Ambiente
+## 🎓 Trilha de Aprendizado (Ementa Completa)
 
-### 1. Requisitos de Sistema
+### 🟢 Módulo 1 — Fundação e RAG
 
-Certifique-se de ter o Python instalado e crie um ambiente virtual para evitar conflitos de dependências:
+- **Aula 1.1:** Arquitetura de Transformers aplicada a código e comparativo de modelos.
+- **Aula 1.2:** Frameworks de agentes (LangChain e CrewAI).
+- **Aula 1.3:** Implementação de RAG e padrões de Chain-of-Thought para evitar alucinações.
+
+### 🔵 Módulo 2 — IaC Copilot (Terraform e Cloud)
+
+- **Aula 2.1:** Tradução de linguagem natural para HCL (Terraform).
+- **Aula 2.2:** Compliance-as-Code: integração com Checkov e OPA.
+- **Aula 2.3:** Detecção de drift e planos de remediação.
+
+### 🟡 Módulo 3 — Kubernetes AI-Ops
+
+- **Aula 3.1:** Manifestos e Autoscaling: geração de YAMLs (Deployments/Services).
+- **Aula 3.2:** Estratégias de Rollout: IA como tomadora de decisão em Canary Deployments.
+- **Aula 3.3:** GitOps Inteligente: reconciliação assistida (Argo CD / Flux).
+
+### 🔴 Módulo 4 — Troubleshooting e Diagnóstico (ReAct)
+
+- **Aula 4.1:** Framework **ReAct**: ensinando a IA a "pensar, agir e observar".
+- **Aula 4.2:** Depuração de Pods: diagnóstico de CrashLoopBackOff e OOMKilled.
+- **Aula 4.3:** Observabilidade: correlação de traces em Jaeger e métricas em Prometheus.
+
+**Prática:** script de "Self-Healing" que identifica falhas e sugere correções no código.
+
+---
+
+## 🚀 Guia de Execução (passo a passo)
+
+### 1) Preparação do ambiente
 
 ```bash
+# Criar e ativar ambiente virtual
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # Windows: .\venv\Scripts\activate
+
+# Instalar dependências e scanner Checkov
+pip install -r requirements.txt
+pip install checkov
 ```
 
-### 2. Instalação de Dependências
+### 2) Configuração de credenciais
 
-Instale as versões validadas para este módulo:
+Crie um arquivo `.env` na raiz do projeto:
 
-```bash
-pip install python-dotenv crewai==0.28.8 langchain-groq litellm
-```
-
-### 3. Variáveis de Ambiente (.env)
-
-Crie um arquivo `.env` na raiz do projeto com suas chaves de API.
-
-**Nota:** Devido a restrições de inicialização do CrewAI, uma chave placeholder da OpenAI é necessária mesmo utilizando Groq.
-
-```bash
-GROQ_API_KEY=gsk_your_key_here
+```env
+GROQ_API_KEY=sua_chave_aqui
 OPENAI_API_KEY=sk-placeholder
 ```
 
-### 4. Configuração de Perfil AWS (Opcional)
+### 3) Executar laboratórios
 
-Se você for trabalhar com recursos AWS (Módulo 2), configure suas credenciais:
-
-```bash
-# Instalar AWS CLI (se ainda não tiver)
-brew install awscli  # macOS
-# ou
-pip install awscli
-
-# Configurar um novo perfil
-aws configure --profile nexus-dev
-
-# Será solicitado:
-# AWS Access Key ID: sua_access_key
-# AWS Secret Access Key: sua_secret_key
-# Default region name: us-east-1
-# Default output format: json
-```
-
-Para usar o perfil no Terraform, adicione ao arquivo `.env`:
+Sempre execute a partir da raiz do projeto:
 
 ```bash
-AWS_PROFILE=nexus-dev
-# ou diretamente nas variáveis de ambiente
-export AWS_PROFILE=nexus-dev
-```
+# Módulo 1 (Fundação)
+python3 modulo1_foundation.py
 
-**Verificar credenciais:**
+# Módulo 2 (IaC/Segurança)
+python3 modulo2_iac_copilot.py
 
-```bash
-aws sts get-caller-identity --profile nexus-dev
+# Módulo 3 (Kubernetes)
+python3 modulo3_k8s_ops.py
+
+# Módulo 4 (Incidentes/ReAct)
+python3 modulo4_troubleshooting.py
 ```
 
 ---
 
-## 🚀 Execução do Laboratório
+## 🛠️ Troubleshooting
 
-O script principal (`nexus_foundation.py`) demonstra o conceito de RAG Funcional. O agente não possui conhecimento prévio das normas da empresa "Nexus", ele é forçado a utilizar uma ferramenta (tool) para buscar essas informações antes de responder.
-
-Para rodar o laboratório:
-
-```bash
-python3 nexus_foundation.py
-```
-
-### O que observar no output:
-
-- **Thought Process:** Acompanhe o raciocínio da IA decidindo usar a ferramenta de normas
-- **Tool Output:** Veja a extração dos prefixos `nexus-` e sufixos `-prod` em tempo real
-- **Final Verdict:** A revisão de segurança validando se o plano está em conformidade
-
----
-
-## 📚 Conceitos-Chave para Revisão
-
-- **Agentic Workflow:** A IA deixa de ser um oráculo e passa a ser um colaborador que executa funções
-- **Chain-of-Thought:** Técnica de prompting que estruturamos nas Tasks para garantir que a IA explique o plano antes de sugerir comandos críticos
-- **Tokenização:** Como a infraestrutura é "quebrada" em pedaços lógicos para processamento da LLM
-
----
-
-# Módulo 2: IaC Copilot — Automação, Compliance e Self-Healing
-
-Neste módulo, evoluímos a Inteligência Artificial de uma interface de chat para um **Motor de Execução de Infraestrutura**. O foco é a materialização de ativos de nuvem (Terraform) e a implementação de camadas de segurança programática.
-
-## 🎯 Objetivos Técnicos
-- **Infrastructure-as-Code Synthesis:** Tradução de requisitos de alto nível para HCL (HashiCorp Configuration Language).
-- **Static Code Analysis (SCA):** Integração profunda com **Checkov** para detecção de misconfigurations.
-- **Policy-as-Code (PaC):** Validação de regras de negócio via **OPA (Open Policy Agent)**.
-- **Drift Management:** Identificação de divergências entre o estado real da nuvem e o código versionado.
-
----
-
-## 🏗️ Arquitetura do Pipeline Agêntico
-
-O ecossistema deste módulo é composto por um fluxo de **Feedback Loop Fechado**, onde a IA atua como desenvolvedora e auditora simultaneamente.
-
-### 1. Camada de Geração (`nexus_iac_copilot.py`)
-Utiliza o Agente **Arquiteto Terraform** para:
-- Interpretar prompts em linguagem natural.
-- Mapear requisitos para provedores específicos (AWS/GCP/Azure).
-- Executar a `writer_tool` para persistir o código em arquivos `.tf`.
-
-### 2. Camada de Governança (`nexus_iac_advanced.py`)
-Implementa o Agente **Auditor de DevSecOps**, que possui duas "visões" críticas:
-- **Visão Técnica (Checkov):** Escaneia o arquivo gerado em busca de vulnerabilidades (ex: S3 público, criptografia desativada, falta de logs).
-- **Visão de Negócio (OPA):** Valida se o recurso segue as políticas da Nexus (ex: Regiões permitidas, tags obrigatórias).
-
-### 3. Camada de Remediação (Self-Healing)
-Se qualquer auditor reprovar o código, o erro é injetado novamente no contexto do Arquiteto. A IA realiza a **refatoração autônoma** até que o código atinja o estado de compliance total.
-
----
-
-## 🛠️ Configuração e Pré-requisitos
-
-### Instalação de Dependências
-Além do CrewAI e Groq, este módulo exige ferramentas de análise estática:
+- **ImportError:** execute os comandos na raiz da pasta principal (`/pos-grad/`), não em subpastas.
+- **Checkov Fail (Mod 2):** valide a instalação com:
 
 ```bash
-# Instalação do Scanner de IaC
-pip install checkov
-
-# Instalação das dependências de orquestração
-pip install litellm langchain-groq python-dotenv
+pip show checkov
 ```
 
-Sugerimos que você pode instalar o checkov como binário também na sua máquina!
+- **Simulações (Mods 3 e 4):** operações destrutivas ou dependentes de clusters reais (Argo CD, Prometheus) usam mocks em Python para focar no fluxo lógico da IA.
 
+---
+
+## ✅ Status
+
+**Módulos 1, 2, 3 e 4 finalizados e integrados.**

@@ -1,0 +1,43 @@
+from crewai import Agent
+from core.llm_config import nexus_llm
+
+def get_arquiteto(tools=None):
+    return Agent(
+        role='Arquiteto de Cloud Nexus',
+        goal='Projetar infraestrutura seguindo normas e gerando código HCL.',
+        backstory='Especialista em AWS/Terraform com foco em governança.',
+        tools=tools or [], # Aceita ferramentas ou lista vazia
+        llm=nexus_llm,
+        verbose=True
+    )
+
+def get_auditor(tools=None): # <--- Adicionamos o argumento tools aqui!
+    return Agent(
+        role='Engenheiro de DevSecOps',
+        goal='Garantir segurança e conformidade total dos projetos.',
+        backstory='Auditor rigoroso que utiliza ferramentas de scan e OPA.',
+        tools=tools or [], # <--- E passamos para o Agent aqui!
+        llm=nexus_llm,
+        verbose=True
+    )
+
+def get_sre_agent(tools=None):
+    return Agent(
+        role='Engenheiro de SRE (K8s Specialist)',
+        goal='Gerenciar workloads Kubernetes e garantir rollouts seguros.',
+        backstory='Especialista em orquestração, GitOps e análise de métricas de tráfego.',
+        tools=tools or [],
+        llm=nexus_llm,
+        verbose=True
+    )
+
+def get_oncall_sre(tools=None):
+    return Agent(
+        role='SRE On-Call (Troubleshooting Expert)',
+        goal='Reduzir o MTTR identificando a causa raiz de falhas no Kubernetes.',
+        backstory='Especialista em ReAct. Você pensa antes de agir, observa os logs e correlaciona eventos.',
+        tools=tools or [],
+        llm=nexus_llm,
+        verbose=True,
+        allow_delegation=True # Permite pedir ajuda ao Arquiteto para o Fix
+    )
