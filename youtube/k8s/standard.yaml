@@ -1,0 +1,126 @@
+# 1. NAMESPACE: Organização é o primeiro passo de um app real
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: producao
+---
+# 2. SERVICE: Abstração de rede
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-checkout-svc
+  namespace: producao
+spec:
+  selector:
+    app: api-checkout
+  ports:
+    - protocol: TCP
+      port: 80          # Porta do Service
+      targetPort: 3000  # Porta real da aplicação
+  type: ClusterIP
+---
+# 3. DEPLOYMENT: O cérebro da aplicação
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-checkout-dep
+  namespace: producao
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1       # Sobe 1 novo antes de matar 1 antigo
+      maxUnavailable: 0 # Nunca fica com menos de 3 pods online
+  selector:
+    matchLabels:
+      app: api-checkout
+  template:
+    metadata:
+      labels:
+        app: api-checkout
+    spec:
+      # SEGURANÇA REAL: Não rodar como root
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: checkout-container
+        image: nginx:alpine # Simulando sua imagem real aqui
+        ports:
+        - containerPort: 3000
+        
+        # RESOURCES: O coração da estabilidade (Crucial para o HPA)
+        resources:
+          requests:
+            cpu: "200m"     # Reserva 0.2 de CPU
+            memory: "256Mi" # Reserva 256MB de RAM
+          limits:
+            cpu: "500m"     # Burst máximo de 0.5 CPU
+            memory: "512Mi" # Hard limit de RAM (evita leak)
+
+        # HEALTH CHECKS: Sem isso, o K8s é cego
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 20
+          periodSeconds: 15
+
+        # GRACEFUL SHUTDOWN: Dá tempo da app fechar conexões
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10"]
+---
+# 4. HPA: Escalabilidade Automática
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-checkout-hpa
+  namespace: producao
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-checkout-dep
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60 # Escala se passar de 60% do Request (120m)
+---
+# 5. INGRESS: Exposição com SSL (Cert-Manager esperado)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-checkout-ingress
+  namespace: producao
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - api.meuapp.com.br
+    secretName: checkout-tls-secret
+  rules:
+  - host: api.meuapp.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-checkout-svc
+            port:
+              number: 80
