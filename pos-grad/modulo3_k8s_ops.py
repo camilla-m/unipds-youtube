@@ -5,12 +5,12 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from crewai import Task, Crew, Process
-from core.agents import get_arquiteto, get_sre_agent
+from core.agents import get_architect, get_sre_agent
 from tools.k8s_ops import k8s_manifest_generator, k8s_apply_tool, canary_analyzer
 
 # 1. Configurar Agentes
 # O Arquiteto gera o YAML e o SRE "aplica" e analisa o sucesso
-arquiteto = get_arquiteto(tools=[k8s_manifest_generator])
+architect = get_architect(tools=[k8s_manifest_generator])
 sre = get_sre_agent(tools=[k8s_apply_tool, canary_analyzer])
 
 # 2. Definir Tarefas do Fluxo GitOps
@@ -19,7 +19,7 @@ task_design = Task(
     ATENÇÃO: Como estamos em um laboratório, utilize obrigatoriamente a imagem pública 'nginx:latest' para todos os containers.
     ATENÇÃO 2: Na API V1 do K8s, se for sugerir tempo de espera no probe, utilize obrigatoriamente 'initialDelaySeconds' (e nunca apenas 'initialDelay').""",
     expected_output="Arquivo YAML criado no disco com sintaxe Kubernetes V1 estrita.",
-    agent=arquiteto
+    agent=architect
 )
 
 task_sync = Task(
@@ -36,7 +36,7 @@ task_monitor = Task(
 
 # 3. Orquestração
 nexus_k8s_pipeline = Crew(
-    agents=[arquiteto, sre],
+    agents=[architect, sre],
     tasks=[task_design, task_sync, task_monitor],
     process=Process.sequential,
     verbose=True

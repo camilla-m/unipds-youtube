@@ -1,13 +1,13 @@
 from crewai import Task, Crew
-from core.agents import get_arquiteto
-from tools.policy_rag import consultar_normas
+from core.agents import get_architect
+from tools.policy_rag import check_rules
 
-arquiteto = get_arquiteto(tools=[consultar_normas])
+architect = get_architect(tools=[check_rules])
 
 task = Task(
     description="Desenhe um bucket S3 para logs seguindo as normas da empresa.",
     expected_output="Plano detalhado com nome e região.",
-    agent=arquiteto
+    agent=architect
 )
 
-Crew(agents=[arquiteto], tasks=[task]).kickoff()
+Crew(agents=[architect], tasks=[task]).kickoff()

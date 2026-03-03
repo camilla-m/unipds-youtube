@@ -1,7 +1,7 @@
 from crewai import Agent
 from core.llm_config import nexus_llm
 
-def get_arquiteto(tools=None):
+def get_architect(tools=None):
     return Agent(
         role='Arquiteto de Cloud Nexus',
         goal='Projetar infraestrutura seguindo normas e gerando código HCL.',

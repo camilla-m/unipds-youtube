@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from crewai import Task, Crew, Process
-from core.agents import get_oncall_sre, get_arquiteto
+from core.agents import get_oncall_sre, get_architect
 from tools.k8s_diag import inspect_pod_failure, suggest_fix
 from tools.file_writer import writer_tool
 
@@ -21,7 +21,7 @@ sre_oncall = get_oncall_sre(tools=[
     query_jaeger_traces
 ])
 
-arquiteto = get_arquiteto(tools=[writer_tool])
+architect = get_architect(tools=[writer_tool])
 
 # 2. Tarefa 4.1, 4.2 e 4.3 - Diagnóstico ReAct Completo (Logs + Metrics + Traces)
 task_diagnose = Task(
@@ -46,12 +46,12 @@ task_self_healing = Task(
     4. O 'path' dos probes HTTPGet DEVE ser obrigatoriamente '/' (pois o Nginx retorna 404 para '/healthz').
     5. Na API V1, utilize 'initialDelaySeconds'.""",
     expected_output="Manifesto YAML corrigido, validado e persistido no disco.",
-    agent=arquiteto
+    agent=architect
 )
 
 # 4. Orquestração
 nexus_incident_crew = Crew(
-    agents=[sre_oncall, arquiteto],
+    agents=[sre_oncall, architect],
     tasks=[task_diagnose, task_self_healing],
     process=Process.sequential,
     verbose=True
