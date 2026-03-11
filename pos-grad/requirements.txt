@@ -1,7 +1,18 @@
-python-dotenv
+# Framework Base de Agentes
 crewai
-crewai_tools
-langchain_groq
-pydantic
-litellm
+crewai[tools]
+
+# LLM e Orquestração
+langchain-groq
+python-dotenv
+
+# Interface Visual (Módulo 6)
+streamlit
+
+# Ferramentas de Infra e Segurança
 checkov
+kubernetes
+
+# Utilitários de Dados
+pandas
+numpy

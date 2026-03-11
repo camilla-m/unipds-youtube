@@ -14,11 +14,11 @@ module "gke" {
 
   node_pools = [
     {
-      name           = "default-node-pool"
-      machine_type   = "e2-medium"
-      min_count      = 1
-      max_count      = 3
-      disk_size_gb   = 50
+      name         = "default-node-pool"
+      machine_type = "e2-medium"
+      min_count    = 1
+      max_count    = 3
+      disk_size_gb = 50
     },
   ]
 }

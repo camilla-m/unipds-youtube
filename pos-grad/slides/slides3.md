@@ -9,6 +9,7 @@ color: #e6edf3
 ---
 # Módulo 3: K8s AI-Ops
 ## Orquestração e SRE Assistida por IA
+**Professora:** Camilla Martins
 
 ---
 
@@ -27,3 +28,19 @@ color: #e6edf3
 ## 3.3 GitOps: O Elo entre IA e Cluster
 - **Reconciliação:** A IA atua como o engenheiro que submete o desejo ao Git.
 - **Argo CD / Flux:** A peça de software que garante que o desejo da IA se torne realidade no Kubernetes.
+
+---
+
+# Prática: GitOps Flow
+- **Cenário:** Deploy do microserviço 'nexus-api' com 2 réplicas.
+- **Fluxo do Lab:** Arquiteto desenha o YAML blindado -> SRE aplica no cluster real -> SRE analisa a latência para aprovar o rollout.
+
+**▶️ Comandos de Execução:**
+```bash
+# 1. Rodar o pipeline de orquestração do K8s
+python3 labs/modulo3_k8s_ops.py
+
+# 2. Verificar se o deployment e os pods subiram corretamente
+kubectl apply -f nexus-api-k8s.yaml
+kubectl get deployments
+kubectl get pods

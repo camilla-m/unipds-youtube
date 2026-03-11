@@ -67,4 +67,4 @@ style: |
 
 ```bash
 # Executando o Módulo 2
-python3 modulo2_iac_copilot.py
+python3 labs/modulo2_iac_copilot.py

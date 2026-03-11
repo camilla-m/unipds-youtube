@@ -69,6 +69,6 @@ No nosso laboratório, implementamos:
 3. **Workflow:** Arquiteto projeta e DevSecOps valida.
 
 ```bash
-# Execução do script fundação
-python3 nexus_foundation.py
+# Execução do script fundação e avaliar o padrão que a IA retorna para nossa infra
+python3 labs/modulo1_foundation.py
 ```

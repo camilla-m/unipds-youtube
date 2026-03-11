@@ -34,4 +34,21 @@ color: #e6edf3
 ---
 
 # Prática: Self-Healing Script
-- Automação do ciclo completo: Identificação da falha -> Proposta de correção -> Atualização do código (Fix).
+- **Cenário:** Deployment `checkout-api` em estado de erro constante.
+- **Fluxo do Lab:** Simular falha -> Diagnóstico da IA -> Aplicação do Fix.
+
+---
+
+**▶️ Comandos de Execução:**
+```bash
+# 0. Provocar o erro (Cenário Inicial)
+kubectl apply -f checkout-broken.yaml
+
+# 1. Rodar o Agente SRE para diagnóstico e auto-cura
+python3 labs/modulo4_troubleshooting.py
+
+# 2. Aplicar a correção sugerida pela IA
+kubectl apply -f checkout-k8s-fix.yaml
+
+# 3. Validar a recuperação
+kubectl get pods

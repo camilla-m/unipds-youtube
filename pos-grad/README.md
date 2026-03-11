@@ -1,80 +1,78 @@
-# 🚀 Nexus AI-Ops Framework
+# 🚀 Nexus AI-Ops: Trilha de Engenharia Agêntica
 
-**Engenharia de Plataforma e SRE assistida por IA agêntica**
+Este repositório contém os laboratórios práticos da Pós-Graduação em AI-Ops e Engenharia de Plataforma. O projeto evolui de uma base de conhecimento (RAG) até a criação de agentes que operam infraestrutura real com governança.
 
-O **Nexus AI-Ops** é um ecossistema modular desenvolvido para demonstrar a aplicação de agentes de IA no ciclo de vida de operações de TI (DevOps & SRE). O projeto evolui de uma fundação de consulta (RAG) para a automação de infraestrutura (IaC), orquestração de containers (Kubernetes) e resolução de incidentes (Troubleshooting).
+## 🛠️ 1. Preparação do Terreno
 
----
+### Pré-requisitos
 
-## 🏗️ Arquitetura do Projeto
+- Python 3.10 a 3.13
+	- Evite Python 3.14 experimental para garantir compatibilidade com CrewAI.
+- Docker e `kubectl` instalados
+	- Necessários para os módulos 3 e 4.
+- Uma chave de API da Groq
+	- Llama 3.3 é o motor utilizado no projeto.
 
-O repositório separa a **Inteligência (Agentes)** das **Capacidades de Execução (Tools)**.
-
-### `core/` — o cérebro
-
-- **`llm_config.py`**: configuração de conexão com Llama 3.3 via Groq/LiteLLM.
-- **`agents.py`**: personas (Arquiteto Cloud, Auditor, SRE e On-Call).
-
-### `tools/` — as mãos
-
-- **`policy_rag.py`** (Mod 1): consulta de normas e documentação.
-- **`file_writer.py`** (Mod 2): persistência de arquivos de infraestrutura.
-- **`security_scan.py`** (Mod 2): integração com Checkov e OPA.
-- **`k8s_ops.py`** (Mod 3): manifestos K8s, reconciliação GitOps e canary.
-- **`k8s_diag.py`** (Mod 4): diagnóstico de Pods (logs, eventos, describe).
-- **`obs_tools.py`** (Mod 4): consultas simuladas em Prometheus e Jaeger.
-
-### `labs/`
-
-Scripts de entrada de cada módulo (`modulo1_*.py` a `modulo4_*.py`).
-
----
-
-## 🎓 Trilha de Aprendizado (Ementa Completa)
-
-### 🟢 Módulo 1 — Fundação e RAG
-
-- **Aula 1.1:** Arquitetura de Transformers aplicada a código e comparativo de modelos.
-- **Aula 1.2:** Frameworks de agentes (LangChain e CrewAI).
-- **Aula 1.3:** Implementação de RAG e padrões de Chain-of-Thought para evitar alucinações.
-
-### 🔵 Módulo 2 — IaC Copilot (Terraform e Cloud)
-
-- **Aula 2.1:** Tradução de linguagem natural para HCL (Terraform).
-- **Aula 2.2:** Compliance-as-Code: integração com Checkov e OPA.
-- **Aula 2.3:** Detecção de drift e planos de remediação.
-
-### 🟡 Módulo 3 — Kubernetes AI-Ops
-
-- **Aula 3.1:** Manifestos e Autoscaling: geração de YAMLs (Deployments/Services).
-- **Aula 3.2:** Estratégias de Rollout: IA como tomadora de decisão em Canary Deployments.
-- **Aula 3.3:** GitOps Inteligente: reconciliação assistida (Argo CD / Flux).
-
-### 🔴 Módulo 4 — Troubleshooting e Diagnóstico (ReAct)
-
-- **Aula 4.1:** Framework **ReAct**: ensinando a IA a "pensar, agir e observar".
-- **Aula 4.2:** Depuração de Pods: diagnóstico de CrashLoopBackOff e OOMKilled.
-- **Aula 4.3:** Observabilidade: correlação de traces em Jaeger e métricas em Prometheus.
-
-**Prática:** script de "Self-Healing" que identifica falhas e sugere correções no código.
-
----
-
-## 🚀 Guia de Execução (passo a passo)
-
-### 1) Preparação do ambiente
+### Instalação
 
 ```bash
-# Criar e ativar ambiente virtual
+# Clone o repositório e entre na pasta
+git clone https://github.com/seu-usuario/nexus-ai-ops.git
+cd nexus-ai-ops
+
+# Crie e ative o ambiente virtual
 python3 -m venv venv
 source venv/bin/activate  # Windows: .\venv\Scripts\activate
 
-# Instalar dependências e scanner Checkov
+# Instale as dependências
 pip install -r requirements.txt
-pip install checkov
+pip install streamlit
 ```
 
-### 2) Configuração de credenciais
+### Instalação no Windows
+
+Use **PowerShell** ou **Prompt de Comando**.
+
+#### PowerShell
+
+```powershell
+# Clone o repositório e entre na pasta
+git clone https://github.com/seu-usuario/nexus-ai-ops.git
+cd nexus-ai-ops
+
+# Crie o ambiente virtual
+py -3.11 -m venv venv
+
+# Ative o ambiente virtual
+.\venv\Scripts\Activate.ps1
+
+# Instale as dependências
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip install streamlit
+```
+
+Se o PowerShell bloquear a ativação do ambiente virtual, execute:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+#### Prompt de Comando (CMD)
+
+```bat
+git clone https://github.com/seu-usuario/nexus-ai-ops.git
+cd nexus-ai-ops
+
+py -3.11 -m venv venv
+venv\Scripts\activate.bat
+
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip install streamlit
+```
+
+### Configuração
 
 Crie um arquivo `.env` na raiz do projeto:
 
@@ -83,39 +81,89 @@ GROQ_API_KEY=sua_chave_aqui
 OPENAI_API_KEY=sk-placeholder
 ```
 
-### 3) Executar laboratórios
+> `OPENAI_API_KEY` pode ser usada apenas como placeholder para evitar erros de inicialização do CrewAI, dependendo da configuração local.
 
-Sempre execute a partir da raiz do projeto:
+## 🎓 2. Guia de Execução dos Laboratórios
 
-```bash
-# Módulo 1 (Fundação)
-python3 modulo1_foundation.py
+### 🟢 Módulo 1 & 2: IA Consultiva e IaC
 
-# Módulo 2 (IaC/Segurança)
-python3 modulo2_iac_copilot.py
-
-# Módulo 3 (Kubernetes)
-python3 modulo3_k8s_ops.py
-
-# Módulo 4 (Incidentes/ReAct)
-python3 modulo4_troubleshooting.py
-```
-
----
-
-## 🛠️ Troubleshooting
-
-- **ImportError:** execute os comandos na raiz da pasta principal (`/pos-grad/`), não em subpastas.
-- **Checkov Fail (Mod 2):** valide a instalação com:
+**Cenário:** validar normas internas e gerar código Terraform seguro.
 
 ```bash
-pip show checkov
+# Rodar diagnóstico de arquitetura e segurança Cloud
+python3 labs/modulo2_iac_copilot.py
 ```
 
-- **Simulações (Mods 3 e 4):** operações destrutivas ou dependentes de clusters reais (Argo CD, Prometheus) usam mocks em Python para focar no fluxo lógico da IA.
+### 🟡 Módulo 3: Kubernetes Ops
 
----
+**Cenário:** criar manifestos K8s blindados.
 
-## ✅ Status
+```bash
+# Geração de YAMLs e estratégia de rollout
+python3 labs/modulo3_k8s_ops.py
+```
 
-**Módulos 1, 2, 3 e 4 finalizados e integrados.**
+### 🔴 Módulo 4: Troubleshooting (Self-Healing)
+
+**Cenário:** recuperar um serviço quebrado no cluster.
+
+```bash
+# 1. Simular o erro (Pod entra em CrashLoop)
+kubectl apply -f checkout-broken.yaml
+
+# 2. Chamar o Agente SRE para diagnosticar e curar
+python3 labs/modulo4_troubleshooting.py
+
+# 3. Aplicar a cura
+kubectl apply -f checkout-k8s-fix.yaml
+```
+
+### 🟣 Módulo 5: AIOps Preditivo
+
+**Cenário:** prever saturação de disco 4h antes de acontecer.
+
+```bash
+# Gerar alerta preditivo e dashboard do Grafana
+python3 labs/modulo5_aiops.py
+```
+
+### 💬 Módulo 6: ChatOps e Governança (Simulador)
+
+**Cenário:** interagir com a infraestrutura via chat com aprovação do gestor.
+
+```bash
+# Iniciar o simulador de Slack no navegador
+./venv/bin/python3 -m streamlit run labs/modulo6_chatops.py
+```
+
+No chat, tente: **@nexus-bot destrua o banco**. O sistema pedirá a senha: **GESTOR-APROVA**.
+
+## 🛠️ Solução de Problemas
+
+### Erro `ModuleNotFoundError: crewai`
+
+Certifique-se de que as dependências foram instaladas e que o ambiente virtual está ativo.
+
+### Erro de versão do Python (3.14)
+
+Se estiver no macOS e o comando `python3` apontar para 3.14, use o interpretador do ambiente virtual:
+
+```bash
+./venv/bin/python3
+```
+
+No Windows, prefira usar:
+
+```powershell
+py -3.11
+```
+
+ou o Python do ambiente virtual:
+
+```powershell
+.\venv\Scripts\python.exe
+```
+
+### `ImportError` em `tools`
+
+Sempre execute os scripts a partir da raiz do projeto, nunca de dentro da pasta `labs`.

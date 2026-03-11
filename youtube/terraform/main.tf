@@ -14,6 +14,6 @@ resource "google_project_service" "apis" {
     "sqladmin.googleapis.com",
     "servicenetworking.googleapis.com"
   ])
-  service = each.key
+  service            = each.key
   disable_on_destroy = false
 }
