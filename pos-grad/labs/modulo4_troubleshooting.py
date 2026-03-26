@@ -36,7 +36,6 @@ task_diagnose = Task(
 )
 
 # 3. Tarefa 4.4 - Self-Healing (Prática 3)
-# 3. Tarefa 4.4 - Self-Healing (Prática 3)
 task_self_healing = Task(
     description="""Com base no diagnóstico do SRE, atue como Arquiteto e gere o arquivo 'checkout-k8s-fix.yaml' com a correção sugerida.
     ATENÇÃO - REGRAS ESTRITAS DE LABORATÓRIO (NÃO DESVIE): 

@@ -14,7 +14,7 @@ architect = get_architect(tools=[writer_tool])
 auditor = get_auditor(tools=[checkov_scan, opa_business_rules])
 
 task_gerar = Task(
-    description="Gere um arquivo 'main.tf' para um bucket S3 seguro chamado 'nexus-apollo-data'. Região deve ser us-west-2.",
+    description="Gere um arquivo 'main.tf' para um bucket S3 seguro chamado 'nexus-apollo-data'. Região deve ser us-east-1.",
     expected_output="Arquivo main.tf gerado com sucesso.",
     agent=architect
 )

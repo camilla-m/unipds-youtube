@@ -67,3 +67,50 @@ def get_chatops_agent(tools=None):
         llm=nexus_llm, 
         verbose=True
     )
+
+def get_devsecops_agent(tools=None):
+    from crewai import Agent
+    return Agent(
+        role='Analista de DevSecOps AI',
+        goal='Triar vulnerabilidades reais e eliminar falsos positivos de scans de segurança, priorizando o que é explorável.',
+        backstory='Um Especialista em segurança ofensiva que sabe distinguir uma biblioteca vulnerável teórica de uma tentativa de invasão ativa ou backdoor em execução.',
+        tools=tools or [],
+        llm=nexus_llm,
+        verbose=True
+    )
+
+def get_cicd_agent(tools=None):
+    from crewai import Agent
+    from core.llm_config import nexus_llm
+
+    return Agent(
+        role='Engenheiro de Platform e CI/CD',
+        goal='Otimizar pipelines de entrega, reduzir tempo de build e garantir rollbacks seguros.',
+        backstory='Um especialista em DevOps que odeia desperdício de tempo de runner. Ele domina estratégias de cache, builds multi-stage e canary deployments.',
+        tools=tools or [],
+        llm=nexus_llm,
+        verbose=True
+    )
+    
+
+def get_finops_agent(tools=None):
+    from crewai import Agent
+    return Agent(
+        role='Consultor de FinOps Cloud',
+        goal='Reduzir o desperdício financeiro na nuvem e sugerir o dimensionamento correto (rightsizing).',
+        backstory='Um auditor financeiro que entende de nuvem. Ele caça recursos zumbis e instâncias superdimensionadas.',
+        tools=tools or [], llm=nexus_llm, verbose=True
+    )
+
+def get_sre_knowledge_agent(tools=None):
+    from crewai import Agent
+    from core.llm_config import nexus_llm
+
+    return Agent(
+        role='Engenheiro SRE de Resposta a Incidentes',
+        goal='Consultar a base de conhecimento (Runbooks) e propor remediações precisas para incidentes.',
+        backstory='Um veterano de plantões que acredita que toda solução deve ser baseada em documentação oficial e evidências. Ele é mestre em transformar incidentes em aprendizado.',
+        tools=tools or [],
+        llm=nexus_llm,
+        verbose=True
+    )
