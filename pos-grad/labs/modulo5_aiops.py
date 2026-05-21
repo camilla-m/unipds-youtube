@@ -1,7 +1,12 @@
-import sys, os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import os
+import sys
 
-from crewai import Task, Crew, Process
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from crewai import Task, Crew
 from core.agents import get_aiops_agent
 from tools.aiops_tools import nl_to_promql, predictive_disk_alert, generate_grafana_dashboard
 
@@ -14,7 +19,7 @@ task_aiops_workflow = Task(
     1. Traduza o pedido "qual a porcentagem de disco livre?" para PromQL.
     2. Avalie o histórico de métricas: 'Uso atual 85%. Crescimento de 2GB por hora contínuo'. Gere uma previsão de quebra.
     3. Crie um Dashboard dinâmico do Grafana para a equipe acompanhar o incidente de 'Disk Saturation'.""",
-    expected_output="O PromQL gerado, o alerta preditivo detalhado (Prática 4) e o JSON do dashboard.",
+    expected_output="O PromQL gerado, o alerta preditivo detalhado e o JSON do dashboard.",
     agent=aiops_agent
 )
 

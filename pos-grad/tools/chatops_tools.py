@@ -1,16 +1,18 @@
 from crewai.tools import tool
 
-@tool("executar_terraform")
-def executar_terraform(comando: str, senha_gestor: str = "Nenhuma"):
+
+@tool("execute_terraform")
+def execute_terraform(command: str, manager_password: str = "None") -> str:
     """
-    Ferramenta para aplicar mudanças de infraestrutura via Terraform.
-    Se o comando envolver 'destruir', 'apagar' ou 'destroy', a senha_gestor DEVE ser 'GESTOR-APROVA'.
+    Tool to apply infrastructure changes via Terraform.
+    If the command involves sensitive operations ('destroy', 'apagar', 'destruir'),
+    the manager_password MUST be provided as 'GESTOR-APROVA'.
     """
-    comando_lower = comando.lower()
-    
-    if any(palavra in comando_lower for palavra in ["destruir", "apagar", "destroy"]):
-        if senha_gestor != "GESTOR-APROVA":
-            return "🛑 BLOQUEADO: Ação crítica! Informe a senha_gestor correta para prosseguir."
-        return "✅ APROVADO: Human-in-the-loop validado. Terraform executado com sucesso."
-            
-    return f"✅ SUCESSO: O comando '{comando}' foi executado (Baixo impacto)."
+    command_lower = command.lower()
+
+    if any(word in command_lower for word in ["destruir", "apagar", "destroy"]):
+        if manager_password != "GESTOR-APROVA":
+            return "🛑 BLOCKED: Critical action detected! Provide the correct manager_password to proceed."
+        return "✅ APPROVED: Human-in-the-loop validated. Terraform executed successfully."
+
+    return f"✅ SUCCESS: The command '{command}' was executed (Low impact)."

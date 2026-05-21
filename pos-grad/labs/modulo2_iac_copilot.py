@@ -1,17 +1,19 @@
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew, Process
 from core.agents import get_architect, get_auditor
-from tools.file_writer import writer_tool
-from tools.security_scan import checkov_scan, opa_business_rules
+from tools.file_writer import write_file
+from tools.security_scan import run_checkov_scan, validate_opa_policies
 
-architect = get_architect(tools=[writer_tool])
-auditor = get_auditor(tools=[checkov_scan, opa_business_rules])
+# Instantiate Agents with tools
+architect = get_architect(tools=[write_file])
+auditor = get_auditor(tools=[run_checkov_scan, validate_opa_policies])
 
 task_gerar = Task(
     description="Gere um arquivo 'main.tf' para um bucket S3 seguro chamado 'nexus-apollo-data'. Região deve ser us-east-1.",
@@ -20,7 +22,7 @@ task_gerar = Task(
 )
 
 task_auditar = Task(
-    description="Valide o 'main.tf' usando checkov e OPA. Se houver erro, o arquiteto deve corrigir.",
+    description="Valide o 'main.tf' usando o run_checkov_scan e o validate_opa_policies. Se houver erro, o arquiteto deve corrigir.",
     expected_output="Relatório de conformidade final.",
     agent=auditor
 )
@@ -33,5 +35,5 @@ nexus_pipeline = Crew(
 )
 
 if __name__ == "__main__":
-    print("\n🚀 EXECUTANDO PIPELINE MODULAR\n")
+    print("\n🚀 EXECUTANDO PIPELINE MODULAR (MÓDULO 2)\n")
     nexus_pipeline.kickoff()

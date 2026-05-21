@@ -1,8 +1,9 @@
 from crewai.tools import tool
 
-@tool("writer_tool")
-def writer_tool(content: str, filename: str = "main.tf"):
-    """Salva código gerado em um arquivo físico."""
-    with open(filename, "w") as f:
-        f.write(content.replace("```hcl", "").replace("```", "").strip())
-    return f"✅ Arquivo {filename} salvo."
+
+@tool("write_file")
+def write_file(content: str, filename: str = "main.tf") -> str:
+    """Saves the generated code to a physical file on disk."""
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(content.replace("```hcl", "").replace("```", "").strip())
+    return f"✅ File '{filename}' saved successfully."

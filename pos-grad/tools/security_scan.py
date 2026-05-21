@@ -1,50 +1,53 @@
-import subprocess
 import os
+import subprocess
 from crewai.tools import tool
 
-@tool("checkov_scan")
-def checkov_scan(filename: str = "main.tf"):
-    """Executa o scanner Checkov real no arquivo para encontrar falhas de segurança."""
+
+@tool("run_checkov_scan")
+def run_checkov_scan(filename: str = "main.tf") -> str:
+    """Runs the Checkov static analysis security scanner on a target infrastructure file."""
     if not os.path.exists(filename):
-        return f"❌ Erro: O arquivo {filename} não foi encontrado para o scan."
+        return f"❌ Error: File '{filename}' not found for scanning."
 
     try:
-        # Executa o comando checkov que você instalou via pip
-        # --quiet: mostra apenas os erros
-        # --compact: formato mais fácil para a IA ler
-        resultado = subprocess.run(
+        # Executes Checkov CLI to scan the target file
+        result = subprocess.run(
             ["checkov", "-f", filename, "--quiet", "--compact", "--no-guide"],
             capture_output=True,
-            text=True
+            text=True,
+            check=False
         )
 
-        # Se o checkov encontrar erros, ele sairá com código diferente de 0
-        if resultado.returncode != 0 or "FAILED" in resultado.stdout:
-            return f"❌ Falhas de Segurança Detectadas pelo Checkov:\n{resultado.stdout}"
+        # Checkov exits with non-zero code or prints FAILED if it finds violations
+        if result.returncode != 0 or "FAILED" in result.stdout:
+            return f"❌ Security Failures Detected by Checkov:\n{result.stdout.strip()}"
         
-        return "✅ Checkov: Nenhuma vulnerabilidade detectada. O código está seguro."
+        return "✅ Checkov: No vulnerabilities detected. Infrastructure code is secure."
 
     except FileNotFoundError:
-        return "⚠️ Erro: Comando 'checkov' não encontrado. Rode 'pip install checkov' no terminal."
-    except Exception as e:
-        return f"⚠️ Erro inesperado ao rodar o scanner: {str(e)}"
-        
-@tool("opa_business_rules")
-def opa_business_rules(content: str):
-    """
-    Simula o motor de decisão do OPA (Open Policy Agent).
-    Valida regras de compliance da Nexus que scanners genéricos não pegam.
-    """
-    # 1. Regra de Negócio: Região Geográfica (Compliance de Soberania de Dados)
-    if "us-east-1" not in content.lower():
-        return "❌ OPA REJECTED: Violação da regra 'SOBERANIA_DADOS'. Recursos Nexus só podem residir em us-east-1."
+        return "⚠️ Error: 'checkov' command-line tool not found. Run 'pip install checkov' in the terminal."
+    except Exception as error:
+        return f"⚠️ Unexpected error running scanner: {str(error)}"
 
-    # 2. Regra de Negócio: Custo/Tamanho (Compliance Financeiro)
-    if "t3.large" in content.lower():
-        return "❌ OPA REJECTED: Violação da regra 'COST_CONTROL'. Instâncias large exigem aprovação manual do financeiro."
 
-    # 3. Regra de Negócio: Segurança de Perímetro
+@tool("validate_opa_policies")
+def validate_opa_policies(content: str) -> str:
+    """
+    Simulates the Open Policy Agent (OPA) policy decision engine.
+    Validates custom corporate governance rules not checked by generic scanners.
+    """
+    content_lower = content.lower()
+
+    # 1. Geographic compliance policy
+    if "us-east-1" not in content_lower:
+        return "❌ OPA REJECTED: Violation of rule 'SOBERANIA_DADOS'. Nexus resources must reside in us-east-1."
+
+    # 2. Cost control policy
+    if "t3.large" in content_lower:
+        return "❌ OPA REJECTED: Violation of rule 'COST_CONTROL'. Large instance sizes require manual finance approval."
+
+    # 3. Network boundary policy
     if "0.0.0.0/0" in content:
-        return "❌ OPA REJECTED: Violação da regra 'NO_PUBLIC_INGRESS'. CIDR aberto não permitido."
+        return "❌ OPA REJECTED: Violation of rule 'NO_PUBLIC_INGRESS'. Open ingress CIDR ranges are strictly forbidden."
 
-    return "✅ OPA PASSED: O código respeita as políticas de governança da Nexus."
+    return "✅ OPA PASSED: Infrastructure code complies with Nexus governance policies."

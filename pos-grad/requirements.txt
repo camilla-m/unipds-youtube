@@ -16,3 +16,5 @@ kubernetes
 # Utilitários de Dados
 pandas
 numpy
+
+litellm

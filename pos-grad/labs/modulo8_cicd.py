@@ -1,32 +1,30 @@
 import os
 import sys
+from crewai.tools import tool
 
-# Ajuste do sys.path para a raiz do projeto
-root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_path not in sys.path:
-    sys.path.append(root_path)
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew
 from core.agents import get_cicd_agent
-from crewai.tools import tool
 
-# --- FERRAMENTA DE ANÁLISE DE WORKFLOW ---
-@tool("analisador_workflow_yaml")
-def analisador_workflow_yaml(caminho_arquivo: str):
-    """Lê um arquivo de workflow CI/CD e retorna o conteúdo para análise de gargalos."""
-    with open(caminho_arquivo, 'r') as f:
-        return f.read()
+# --- TOOL DEFINITION ---
+@tool("analyze_workflow_yaml")
+def analyze_workflow_yaml(file_path: str) -> str:
+    """Reads a CI/CD workflow YAML file and returns its content for bottleneck analysis."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return file.read()
 
-# --- CONFIGURAÇÃO ---
-# Caminho dinâmico para o arquivo lento
-diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-caminho_yaml = os.path.join(diretorio_atual, "..", "data", "workflow_lento.yaml")
+# --- CONFIGURATION ---
+yaml_workflow_path = os.path.join(PROJECT_ROOT, "data", "workflow_lento.yaml")
 
-agent = get_cicd_agent(tools=[analisador_workflow_yaml])
+agent = get_cicd_agent(tools=[analyze_workflow_yaml])
 
-task = Task(
+task_optimize_cicd = Task(
     description=f"""
-    Analise o workflow em '{caminho_yaml}'. 
+    Analise o workflow em '{yaml_workflow_path}'. 
     Identifique por que ele está lento e custando caro (dica: falta de cache). 
     Reescreva o trecho do YAML aplicando as melhores práticas de cache para Node.js 
     e explique quanto tempo estimamos economizar.""",
@@ -36,4 +34,5 @@ task = Task(
 
 if __name__ == "__main__":
     print("\n⚡ INICIANDO MÓDULO 8: OTIMIZAÇÃO DE CI/CD\n")
-    Crew(agents=[agent], tasks=[task]).kickoff()
+    crew = Crew(agents=[agent], tasks=[task_optimize_cicd])
+    crew.kickoff()

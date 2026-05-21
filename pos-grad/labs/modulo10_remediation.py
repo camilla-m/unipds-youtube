@@ -1,31 +1,30 @@
 import os
 import sys
+from crewai.tools import tool
 
-# Ajuste do sys.path
-root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_path not in sys.path:
-    sys.path.append(root_path)
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew
 from core.agents import get_sre_knowledge_agent
-from crewai.tools import tool
 
-# --- FERRAMENTA RAG (LEITURA DE RUNBOOK) ---
-@tool("consultar_runbook")
-def consultar_runbook(servico: str):
-    """Lê o arquivo de runbook oficial para um serviço específico e retorna os passos de correção."""
-    diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-    caminho_runbook = os.path.join(diretorio_atual, "..", "data", f"runbook_{servico}.md")
+# --- TOOL DEFINITION (RAG FOR RUNBOOK) ---
+@tool("consult_runbook")
+def consult_runbook(service_name: str) -> str:
+    """Reads the official runbook file for a specific service and returns the remediation steps."""
+    runbook_path = os.path.join(PROJECT_ROOT, "data", f"runbook_{service_name}.md")
     try:
-        with open(caminho_runbook, 'r') as f:
-            return f.read()
+        with open(runbook_path, 'r', encoding='utf-8') as file:
+            return file.read()
     except FileNotFoundError:
-        return f"Erro: Runbook para o serviço '{servico}' não encontrado."
+        return f"Error: Runbook for service '{service_name}' not found."
 
-# --- CONFIGURAÇÃO ---
-agent = get_sre_knowledge_agent(tools=[consultar_runbook])
+# --- CONFIGURATION ---
+agent = get_sre_knowledge_agent(tools=[consult_runbook])
 
-task = Task(
+task_remediate_incident = Task(
     description="""
     Recebemos um alerta de 'Saturação de Conexões' no banco de dados (db). 
     1. Consulte o runbook oficial para o serviço 'db'.
@@ -37,4 +36,5 @@ task = Task(
 
 if __name__ == "__main__":
     print("\n📚 INICIANDO MÓDULO 10: RAG & AUTO-REMEDIAÇÃO\n")
-    Crew(agents=[agent], tasks=[task]).kickoff()
+    crew = Crew(agents=[agent], tasks=[task_remediate_incident])
+    crew.kickoff()

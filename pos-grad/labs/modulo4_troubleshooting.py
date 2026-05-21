@@ -1,15 +1,15 @@
 import os
 import sys
 
-# Garante que o Python encontra a pasta tools (padrão que usamos nos outros módulos)
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew, Process
 from core.agents import get_oncall_sre, get_architect
 from tools.k8s_diag import inspect_pod_failure, suggest_fix
-from tools.file_writer import writer_tool
-
-# NOVO: Importando as ferramentas de Observabilidade (Aula 4.3)
+from tools.file_writer import write_file
 from tools.obs_tools import query_prometheus_metrics, query_jaeger_traces
 
 # 1. Instanciando agentes
@@ -21,7 +21,7 @@ sre_oncall = get_oncall_sre(tools=[
     query_jaeger_traces
 ])
 
-architect = get_architect(tools=[writer_tool])
+architect = get_architect(tools=[write_file])
 
 # 2. Tarefa 4.1, 4.2 e 4.3 - Diagnóstico ReAct Completo (Logs + Metrics + Traces)
 task_diagnose = Task(

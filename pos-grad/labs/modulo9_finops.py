@@ -1,32 +1,31 @@
+import json
 import os
 import sys
-import json
+from crewai.tools import tool
 
-# Ajuste do sys.path
-root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_path not in sys.path:
-    sys.path.append(root_path)
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew
 from core.agents import get_finops_agent
-from crewai.tools import tool
 
-# --- FERRAMENTA DE AUDITORIA DE CUSTOS ---
-@tool("analisador_custos_cloud")
-def analisador_custos_cloud(caminho_arquivo: str):
-    """Lê um inventário de recursos cloud e retorna os dados para análise de economia."""
-    with open(caminho_arquivo, 'r') as f:
-        return json.load(f)
+# --- TOOL DEFINITION ---
+@tool("analyze_cloud_costs")
+def analyze_cloud_costs(file_path: str) -> dict:
+    """Reads a cloud resource inventory and returns the data for cost-saving analysis."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
 
-# --- CONFIGURAÇÃO ---
-diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-caminho_json = os.path.join(diretorio_atual, "..", "data", "inventario_cloud.json")
+# --- CONFIGURATION ---
+cloud_inventory_path = os.path.join(PROJECT_ROOT, "data", "inventario_cloud.json")
 
-agent = get_finops_agent(tools=[analisador_custos_cloud])
+agent = get_finops_agent(tools=[analyze_cloud_costs])
 
-task = Task(
+task_audit_finops = Task(
     description=f"""
-    Analise o inventário em '{caminho_json}'. 
+    Analise o inventário em '{cloud_inventory_path}'. 
     Identifique: 
     1. Recursos 'Zumbis' (volumes disponíveis mas não usados, IPs soltos).
     2. Instâncias superdimensionadas (Rightsizing).
@@ -37,4 +36,5 @@ task = Task(
 
 if __name__ == "__main__":
     print("\n💰 INICIANDO MÓDULO 9: AUDITORIA FINOPS\n")
-    Crew(agents=[agent], tasks=[task]).kickoff()
+    crew = Crew(agents=[agent], tasks=[task_audit_finops])
+    crew.kickoff()

@@ -1,10 +1,11 @@
-import subprocess
 import os
+import subprocess
 from crewai.tools import tool
 
-@tool("k8s_manifest_generator")
-def k8s_manifest_generator(app_name: str, replicas: int, port: int):
-    """Gera manifestos YAML de Deployment e Service para Kubernetes."""
+
+@tool("generate_k8s_manifest")
+def generate_k8s_manifest(app_name: str, replicas: int, port: int) -> str:
+    """Generates Kubernetes Deployment and Service YAML manifests on disk."""
     manifest = f"""apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -42,30 +43,42 @@ spec:
     targetPort: {port}
 """
     filename = f"{app_name}-k8s.yaml"
-    with open(filename, "w") as f:
-        f.write(manifest)
-    return f"✅ Manifestos para {app_name} gerados em {filename}."
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(manifest)
+    return f"✅ Kubernetes manifests for '{app_name}' successfully generated in '{filename}'."
 
-@tool("k8s_apply_tool")
-def k8s_apply_tool(filename: str):
-    """Simula ou executa a reconciliação GitOps via kubectl apply."""
+
+@tool("apply_k8s_manifest")
+def apply_k8s_manifest(filename: str) -> str:
+    """Simulates or executes GitOps reconciliation using 'kubectl apply'."""
+    if not os.path.exists(filename):
+        return f"❌ Error: The file '{filename}' was not found to apply."
+
     try:
-        # Tenta executar no cluster real (se houver um configurado)
-        # Se não houver, o erro será capturado e tratado como simulação
+        # Attempts to apply the manifest to a real cluster if available
         result = subprocess.run(
             ["kubectl", "apply", "-f", filename],
-            capture_output=True, text=True
+            capture_output=True,
+            text=True,
+            check=False
         )
         if result.returncode == 0:
-            return f"✅ GitOps Sync Sucesso: {result.stdout}"
-        else:
-            return f"⚠️ Simulação GitOps: Arquivo {filename} validado, mas o cluster K8s não foi detectado. O controlador aguardaria o sync."
+            return f"✅ GitOps Sync Success: {result.stdout.strip()}"
+        
+        return (
+            f"⚠️ GitOps Simulation: File '{filename}' is syntactically valid, "
+            f"but no Kubernetes cluster was detected. The GitOps controller would reconcile this state."
+        )
     except FileNotFoundError:
-        return "ℹ️ Modo Simulação: Kubectl não instalado. Em produção, o ArgoCD aplicaria este manifesto agora."
+        return (
+            f"ℹ️ Simulation Mode: 'kubectl' command line tool is not installed. "
+            f"In a production system, ArgoCD or Flux would apply this manifest now."
+        )
 
-@tool("canary_analyzer")
-def canary_analyzer(metrics_data: str):
-    """Analisa métricas para decisão de Rollout."""
-    if "error_rate > 5%" in metrics_data:
-        return "❌ ROLLBACK: Taxa de erro elevada no Canary."
-    return "✅ PROCEED: Métricas estáveis. Rollout aprovado."
+
+@tool("analyze_canary_metrics")
+def analyze_canary_metrics(metrics_data: str) -> str:
+    """Analyzes application metrics to decide if a Canary Rollout should proceed or rollback."""
+    if "error_rate > 5%" in metrics_data or "error" in metrics_data.lower():
+        return "❌ ROLLBACK: Elevated error rate detected in Canary pods. Reverting deployment."
+    return "✅ PROCEED: Metrics are stable. Canary rollout approved for production."

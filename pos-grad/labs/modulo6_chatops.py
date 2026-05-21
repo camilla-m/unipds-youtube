@@ -1,19 +1,28 @@
-import streamlit as st
 import os
 import sys
+import streamlit as st
 
-# Força o Python a enxergar a raiz do projeto (pos-grad)
-# Isso evita o erro de não achar 'core' ou 'tools'
-root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if root_path not in sys.path:
-    sys.path.append(root_path)
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew
 from core.agents import get_chatops_agent
-from tools.chatops_tools import executar_terraform
+from tools.chatops_tools import execute_terraform
 
 # --- INTERFACE VISUAL (STREAMLIT) ---
-st.set_page_config(page_title="Nexus Slack Simulator", page_icon="💬")
+st.set_page_config(page_title="Nexus Slack Simulator", page_icon="💬", layout="wide")
+
+# Modern styling for Streamlit Slack Simulator
+st.markdown("""
+<style>
+    .reportview-container { background: #0e1117; }
+    .chat-header { color: #5865F2; font-weight: bold; font-size: 24px; margin-bottom: 20px; }
+    .stButton>button { background-color: #5865F2; color: white; border-radius: 8px; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("💬 Nexus Slack Simulator")
 st.markdown("Canais: `#infra-ops` | Logado como: `@camilla.martins`")
 
@@ -31,11 +40,11 @@ if prompt := st.chat_input("Ex: @nexus-bot destrua o banco de dados..."):
 
     with st.chat_message("assistant"):
         with st.spinner("🤖 Nexus-Bot processando..."):
-            # IMPORTANTE: Passamos as ferramentas e o LLM aqui
-            agent = get_chatops_agent(tools=[executar_terraform])
+            # Instantiate agent with execute_terraform tool
+            agent = get_chatops_agent(tools=[execute_terraform])
             
             task = Task(
-                description=f"O usuário @camilla.martins disse: '{prompt}'. Se for algo crítico, use 'executar_terraform'. Responda curto e com emojis.",
+                description=f"O usuário @camilla.martins disse: '{prompt}'. Se for algo crítico, use 'execute_terraform'. Responda curto e com emojis.",
                 expected_output="Resposta do bot confirmando a ação ou pedindo aprovação/senha.",
                 agent=agent
             )

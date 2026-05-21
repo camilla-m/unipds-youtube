@@ -1,36 +1,31 @@
+import json
 import os
 import sys
-import json
 from crewai.tools import tool
 
-# Ajuste do sys.path para garantir que o Python ache 'core' e 'tools'
-root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-caminho_trivy = os.path.join(root_path, "data", "trivy.json")
-
-if root_path not in sys.path:
-    sys.path.append(root_path)
+# Ensure project root is in the Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from crewai import Task, Crew
 from core.agents import get_devsecops_agent
 
-# --- DEFINIÇÃO DA FERRAMENTA (TOOL) ---
-@tool("analisador_trivy_real")
-def analisador_trivy_real(caminho_arquivo: str):
-    """
-    Lê um arquivo JSON de scan do Trivy e retorna os dados brutos. 
-    Use esta ferramenta para analisar relatórios de segurança de imagens reais.
-    """
-    with open(caminho_arquivo, 'r') as f:
-        return json.load(f)
+trivy_report_path = os.path.join(PROJECT_ROOT, "data", "trivy.json")
 
-# --- CONFIGURAÇÃO DO AGENTE E TAREFA ---
-# Passamos a ferramenta para o agente
-agent = get_devsecops_agent(tools=[analisador_trivy_real])
+# --- TOOL DEFINITION ---
+@tool("analyze_trivy_report")
+def analyze_trivy_report(file_path: str) -> dict:
+    """Reads a Trivy security scan JSON report and returns its raw data."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
 
-task = Task(
+# --- AGENT & TASK CONFIGURATION ---
+agent = get_devsecops_agent(tools=[analyze_trivy_report])
+
+task_audit_security = Task(
     description=f"""
-    Analise o relatório de segurança real em '{caminho_trivy}'. 
+    Analise o relatório de segurança real em '{trivy_report_path}'. 
     Filtre o ruído e identifique se há alguma ameaça crítica de Backdoor (como a CVE-2024-3094). 
     Gere um relatório executivo explicando o risco e o plano de ação imediato.""",
     expected_output="Relatório priorizado com foco em ameaças reais e exploráveis.",
@@ -39,4 +34,5 @@ task = Task(
 
 if __name__ == "__main__":
     print("\n🛡️ INICIANDO MÓDULO 7: AUDITORIA DE SEGURANÇA AI\n")
-    Crew(agents=[agent], tasks=[task]).kickoff()
+    crew = Crew(agents=[agent], tasks=[task_audit_security])
+    crew.kickoff()

@@ -1,29 +1,29 @@
-import subprocess
 from crewai.tools import tool
 
+
 @tool("inspect_pod_failure")
-def inspect_pod_failure(pod_name: str):
-    """Analisa logs e eventos de um Pod para diagnosticar CrashLoopBackOff ou OOMKilled."""
-    # Simulação de diagnóstico técnico
-    if "api" in pod_name:
+def inspect_pod_failure(pod_name: str) -> str:
+    """Analyzes a Kubernetes Pod's logs and events to diagnose CrashLoopBackOff or OOMKilled errors."""
+    if "api" in pod_name.lower():
         return """
-        EVENTOS: 
+        EVENTS: 
         - Warning  BackOff  Back-off restarting failed container
         LOGS:
         - Error: Cannot connect to database at 10.0.1.5:5432
-        DIAGNÓSTICO: Falha de conectividade (Network/Config).
+        DIAGNOSIS: Database connectivity failure (Network/Config).
         """
-    if "worker" in pod_name:
+    if "worker" in pod_name.lower():
         return "STATUS: Terminated | REASON: OOMKilled | MEMORY_USAGE: 512Mi (Limit: 512Mi)."
-    
-    return f"Logs do Pod {pod_name} parecem normais, mas o Readiness Probe está falhando."
+
+    return f"Logs for Pod '{pod_name}' look normal, but the Readiness Probe is failing."
+
 
 @tool("suggest_fix")
-def suggest_fix(issue_type: str):
-    """Sugere a correção técnica no manifesto baseado no diagnóstico."""
-    fixes = {
-        "OOMKilled": "Aumentar os 'resources.limits.memory' para 1Gi no Deployment.",
-        "ImagePullBackOff": "Corrigir a tag da imagem para 'latest' ou uma versão válida no ECR/DockerHub.",
-        "CrashLoopBackOff": "Verificar variáveis de ambiente (DB_URL) ou segredos (Secrets) ausentes."
+def suggest_fix(issue_type: str) -> str:
+    """Suggests the appropriate technical resolution in the Kubernetes manifest based on the issue type."""
+    remediations = {
+        "OOMKilled": "Increase 'resources.limits.memory' to 1Gi in the Deployment spec.",
+        "ImagePullBackOff": "Correct the image tag to a valid version or 'latest' in ECR/DockerHub.",
+        "CrashLoopBackOff": "Check for missing environment variables (e.g., DB_URL) or Kubernetes Secrets."
     }
-    return fixes.get(issue_type, "Revisar a configuração do Readiness Probe no manifesto.")
+    return remediations.get(issue_type, "Review the Readiness Probe and Liveness Probe configurations in the manifest.")
